@@ -20,8 +20,8 @@ using namespace std;
 #endif
 #endif
 
-
 // 응용 프로그램 정보에 사용되는 CAboutDlg 대화 상자입니다.
+CgProjectDlg* CgProjectDlg::pThis = NULL;
 
 class CAboutDlg : public CDialogEx
 {
@@ -59,9 +59,16 @@ END_MESSAGE_MAP()
 
 
 CgProjectDlg::CgProjectDlg(CWnd* pParent /*=nullptr*/)
-	: CDialogEx(IDD_GPROJECT_DIALOG, pParent)
+	: CDialogEx(IDD_GPROJECT_DIALOG, pParent),
+	m_pDlgImage(nullptr),
+	m_pDlgImgResult(nullptr)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+}
+
+CgProjectDlg::~CgProjectDlg()
+{
+	Clear();
 }
 
 void CgProjectDlg::DoDataExchange(CDataExchange* pDX)
@@ -73,8 +80,8 @@ BEGIN_MESSAGE_MAP(CgProjectDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
-	ON_BN_CLICKED(IDC_BTN_DLG, &CgProjectDlg::OnBnClickedBtnDlg)
 	ON_WM_DESTROY()
+	ON_BN_CLICKED(IDC_BTN_TEST, &CgProjectDlg::OnBnClickedBtnTest)
 END_MESSAGE_MAP()
 
 
@@ -110,9 +117,22 @@ BOOL CgProjectDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 작은 아이콘을 설정합니다.
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
+	pThis = this;
+	Clear();
+
+	MoveWindow(0, 0, CHILD ::WINDOW_WIDTH*2, CHILD::WINDOW_HEIGHT*2);
 	m_pDlgImage = new CDlgImage;
 	m_pDlgImage->Create(IDD_CDlgImage, this);
 	m_pDlgImage->ShowWindow(SW_SHOW);
+	m_pDlgImage->MoveWindow(0, 0, CHILD::WINDOW_WIDTH, CHILD::WINDOW_HEIGHT);
+
+
+	m_pDlgImgResult = new CDlgImage;
+	m_pDlgImgResult->Create(IDD_CDlgImage, this);
+	m_pDlgImgResult->ShowWindow(SW_SHOW);
+	m_pDlgImgResult->MoveWindow(CHILD::WINDOW_WIDTH, 0, CHILD::WINDOW_WIDTH, CHILD::WINDOW_HEIGHT);
+
+	SetConsoleCtrlHandler(ConsoleHandler, TRUE);
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
@@ -159,6 +179,26 @@ void CgProjectDlg::OnPaint()
 	}
 }
 
+BOOL WINAPI CgProjectDlg::ConsoleHandler(DWORD dwCtrlType)
+{
+	switch (dwCtrlType)
+	{
+	case CTRL_C_EVENT:
+	case CTRL_CLOSE_EVENT:
+	case CTRL_BREAK_EVENT:
+	case CTRL_LOGOFF_EVENT:
+	case CTRL_SHUTDOWN_EVENT:
+		std::cout << "Cleaning up resources...\n";
+		// 🔑 리소스 해제 코드 작성
+		// 예: delete, free, CloseHandle, GDI DeleteObject 등
+		if(pThis)
+			pThis->WindowDestroy();
+		return TRUE;
+	default:
+		return FALSE;
+	}
+}
+
 // 사용자가 최소화된 창을 끄는 동안에 커서가 표시되도록 시스템에서
 //  이 함수를 호출합니다.
 HCURSOR CgProjectDlg::OnQueryDragIcon()
@@ -166,23 +206,65 @@ HCURSOR CgProjectDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
-
-void CgProjectDlg::OnBnClickedBtnDlg()
-{
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	m_pDlgImage->ShowWindow(SW_SHOW);
-}
-
 void CgProjectDlg::OnDestroy()
 {
 	CDialogEx::OnDestroy();
 
 	// TODO: 여기에 메시지 처리기 코드를 추가합니다.
-	delete m_pDlgImage;
+	Clear();
+}
+void CgProjectDlg::WindowDestroy()
+{
+	m_pDlgImage = nullptr;
+	m_pDlgImgResult = nullptr;
+}
+
+void CgProjectDlg::Clear()
+{
+	if (m_pDlgImage)
+		delete m_pDlgImage;
+	m_pDlgImage = nullptr;
+	if (m_pDlgImgResult)
+		delete m_pDlgImgResult;
+	m_pDlgImgResult = nullptr;
 }
 
 void CgProjectDlg::callFunc(int n)
 {
 	int nData = n;
 	cout << "data : " << n << endl;
+}
+
+void CgProjectDlg::OnBnClickedBtnTest()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	unsigned char* fm = (unsigned char* )m_pDlgImage->m_Image.GetBits();
+	cout << "OnBnClickedBtnTest" << endl;
+
+	int nWitdh = m_pDlgImage->m_Image.GetWidth();
+	int nHeight = m_pDlgImage->m_Image.GetHeight();
+	int nPitch = m_pDlgImage->m_Image.GetPitch();
+
+	memset(fm, 0xff, nWitdh * nHeight);
+
+	for (int k = 0;k < 100;k++) {
+		int x = rand() % nWitdh;
+		int y = rand() % nHeight;
+		fm[y * nPitch + x] = 0;
+	}
+
+	int nIndex = 0;
+	m_pDlgImgResult->m_nDataCount = 0;
+	for (int j = 0; j < nHeight; j++) {
+		for (int i = 0; i < nWitdh; i++) {
+			if (fm[j * nPitch + i] == 0 && m_pDlgImgResult->m_nDataCount < Array::POINT_MAX) {
+				m_pDlgImgResult->m_ptData[nIndex].x = i;
+				m_pDlgImgResult->m_ptData[nIndex].y = j;
+				m_pDlgImgResult->m_nDataCount = ++nIndex;
+			}				
+		}
+	}
+
+	m_pDlgImage->Invalidate();
+	m_pDlgImgResult->Invalidate();
 }

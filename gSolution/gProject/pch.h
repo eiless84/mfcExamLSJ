@@ -10,4 +10,13 @@
 // 여기에 미리 컴파일하려는 헤더 추가
 #include "framework.h"
 
+enum CHILD{
+	WINDOW_WIDTH = 640,
+	WINDOW_HEIGHT = 480,
+};
+enum Array
+{
+	POINT_MAX = 100,
+};
+
 #endif //PCH_H

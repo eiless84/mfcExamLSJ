@@ -43,6 +43,5 @@ public:
 	afx_msg void OnDestroy();
 	void WindowDestroy();
 	void Clear();
-	void callFunc(int n);
 	afx_msg void OnBnClickedBtnTest();
 };

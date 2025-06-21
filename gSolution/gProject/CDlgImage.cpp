@@ -5,7 +5,7 @@
 #include "gProject.h"
 #include "afxdialogex.h"
 #include "CDlgImage.h"
-
+#include "gProjectDlg.h"
 
 // CDlgImage 대화 상자
 
@@ -33,8 +33,6 @@ END_MESSAGE_MAP()
 
 
 // CDlgImage 메시지 처리기
-
-#include "gProjectDlg.h"
 BOOL CDlgImage::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
@@ -64,13 +62,10 @@ void CDlgImage::OnPaint()
 
 void CDlgImage::drawData(CDC* pDC)
 {
-	//int nWidth = CHILD::WINDOW_WIDTH;
-	//int nHeight = CHILD::WINDOW_HEIGHT;
-
 	CRect rect;
 	CPen pen;
 	
-	pen.CreatePen(PS_SOLID, 5, RGB(0xff, 0, 0));
+	pen.CreatePen(PS_SOLID, 5, COLOR_GREEN);
 	CPen* pOldPen = pDC->SelectObject(&pen);
 
 	for (int i = 0; i < m_nDataCount; i++) {
@@ -99,5 +94,5 @@ void CDlgImage::InitImage()
 	int nPitch = m_Image.GetPitch();
 	unsigned char* fm = (unsigned char*)m_Image.GetBits();
 
-	memset(fm, 0xff, nWidth * nHeight);
+	memset(fm, 0xff, nWidth * nHeight);	// 0xff WHITE
 }

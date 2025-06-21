@@ -229,12 +229,6 @@ void CgProjectDlg::Clear()
 	m_pDlgImgResult = nullptr;
 }
 
-void CgProjectDlg::callFunc(int n)
-{
-	int nData = n;
-	cout << "data : " << n << endl;
-}
-
 void CgProjectDlg::OnBnClickedBtnTest()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
@@ -245,22 +239,24 @@ void CgProjectDlg::OnBnClickedBtnTest()
 	int nHeight = m_pDlgImage->m_Image.GetHeight();
 	int nPitch = m_pDlgImage->m_Image.GetPitch();
 
-	memset(fm, 0xff, nWitdh * nHeight);
+	memset(fm, 0, nWitdh * nHeight);	// 0 BLACK
 
-	for (int k = 0;k < 100;k++) {
+	for (int k = 0;k < Array::POINT_MAX;k++) {
 		int x = rand() % nWitdh;
 		int y = rand() % nHeight;
-		fm[y * nPitch + x] = 0;
+		fm[y * nPitch + x] = rand() % 255;
 	}
 
 	int nIndex = 0;
+	int nTh = 100;
 	m_pDlgImgResult->m_nDataCount = 0;
 	for (int j = 0; j < nHeight; j++) {
 		for (int i = 0; i < nWitdh; i++) {
-			if (fm[j * nPitch + i] == 0 && m_pDlgImgResult->m_nDataCount < Array::POINT_MAX) {
+			if (fm[j * nPitch + i] > nTh && m_pDlgImgResult->m_nDataCount < Array::POINT_MAX) {
 				m_pDlgImgResult->m_ptData[nIndex].x = i;
 				m_pDlgImgResult->m_ptData[nIndex].y = j;
 				m_pDlgImgResult->m_nDataCount = ++nIndex;
+				cout << nIndex << ":" << i << ","<< j << endl;
 			}				
 		}
 	}

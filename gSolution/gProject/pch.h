@@ -16,7 +16,12 @@ enum CHILD{
 };
 enum Array
 {
-	POINT_MAX = 100,
+	POINT_MAX = 1000,
 };
+
+#define COLOR_BLACK	RGB(0, 0, 0)
+#define COLOR_RED	RGB(0xff, 0, 0)
+#define COLOR_GREEN RGB(0, 0xff, 0)
+#define COLOR_BLUE	RGB(0, 0, 0xff)
 
 #endif //PCH_H

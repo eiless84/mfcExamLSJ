@@ -3,7 +3,6 @@
 
 
 // CDlgImage 대화 상자
-
 class CDlgImage : public CDialogEx
 {
 	DECLARE_DYNAMIC(CDlgImage)
